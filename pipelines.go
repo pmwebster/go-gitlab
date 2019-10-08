@@ -18,7 +18,6 @@ package gitlab
 
 import (
 	"fmt"
-	"net/url"
 	"time"
 )
 
@@ -42,46 +41,56 @@ type PipelineVariable struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/pipelines.html
 type Pipeline struct {
-	ID         int    `json:"id"`
-	Status     string `json:"status"`
-	Ref        string `json:"ref"`
-	Sha        string `json:"sha"`
-	BeforeSha  string `json:"before_sha"`
-	Tag        bool   `json:"tag"`
-	YamlErrors string `json:"yaml_errors"`
-	User       struct {
-		Name      string `json:"name"`
-		Username  string `json:"username"`
-		ID        int    `json:"id"`
-		State     string `json:"state"`
-		AvatarURL string `json:"avatar_url"`
-		WebURL    string `json:"web_url"`
-	}
-	UpdatedAt   *time.Time `json:"updated_at"`
-	CreatedAt   *time.Time `json:"created_at"`
-	StartedAt   *time.Time `json:"started_at"`
-	FinishedAt  *time.Time `json:"finished_at"`
-	CommittedAt *time.Time `json:"committed_at"`
-	Duration    int        `json:"duration"`
-	Coverage    string     `json:"coverage"`
+	ID             int             `json:"id"`
+	Status         string          `json:"status"`
+	Ref            string          `json:"ref"`
+	SHA            string          `json:"sha"`
+	BeforeSHA      string          `json:"before_sha"`
+	Tag            bool            `json:"tag"`
+	YamlErrors     string          `json:"yaml_errors"`
+	User           *BasicUser      `json:"user"`
+	UpdatedAt      *time.Time      `json:"updated_at"`
+	CreatedAt      *time.Time      `json:"created_at"`
+	StartedAt      *time.Time      `json:"started_at"`
+	FinishedAt     *time.Time      `json:"finished_at"`
+	CommittedAt    *time.Time      `json:"committed_at"`
+	Duration       int             `json:"duration"`
+	Coverage       string          `json:"coverage"`
+	WebURL         string          `json:"web_url"`
+	DetailedStatus *DetailedStatus `json:"detailed_status"`
 }
 
-func (i Pipeline) String() string {
-	return Stringify(i)
+// DetailedStatus contains detailed information about the status of a pipeline
+type DetailedStatus struct {
+	Icon         string `json:"icon"`
+	Text         string `json:"text"`
+	Label        string `json:"label"`
+	Group        string `json:"group"`
+	Tooltip      string `json:"tooltip"`
+	HasDetails   bool   `json:"has_details"`
+	DetailsPath  string `json:"details_path"`
+	Illustration struct {
+		Image string `json:"image"`
+	} `json:"illustration"`
+	Favicon string `json:"favicon"`
 }
 
-// PipelineList represents a GitLab list project pipelines
-//
-// GitLab API docs: https://docs.gitlab.com/ce/api/pipelines.html#list-project-pipelines
-type PipelineList []struct {
+func (p Pipeline) String() string {
+	return Stringify(p)
+}
+
+// PipelineInfo shows the basic entities of a pipeline, mostly used as fields
+// on other assets, like Commit.
+type PipelineInfo struct {
 	ID     int    `json:"id"`
 	Status string `json:"status"`
 	Ref    string `json:"ref"`
-	Sha    string `json:"sha"`
+	SHA    string `json:"sha"`
+	WebURL string `json:"web_url"`
 }
 
-func (i PipelineList) String() string {
-	return Stringify(i)
+func (p PipelineInfo) String() string {
+	return Stringify(p)
 }
 
 // ListProjectPipelinesOptions represents the available ListProjectPipelines() options.
@@ -103,23 +112,24 @@ type ListProjectPipelinesOptions struct {
 // ListProjectPipelines gets a list of project piplines.
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/pipelines.html#list-project-pipelines
-func (s *PipelinesService) ListProjectPipelines(pid interface{}, opt *ListProjectPipelinesOptions, options ...OptionFunc) (PipelineList, *Response, error) {
+func (s *PipelinesService) ListProjectPipelines(pid interface{}, opt *ListProjectPipelinesOptions, options ...OptionFunc) ([]*PipelineInfo, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pipelines", url.QueryEscape(project))
+	u := fmt.Sprintf("projects/%s/pipelines", pathEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var p PipelineList
+	var p []*PipelineInfo
 	resp, err := s.client.Do(req, &p)
 	if err != nil {
 		return nil, resp, err
 	}
+
 	return p, resp, err
 }
 
@@ -131,7 +141,7 @@ func (s *PipelinesService) GetPipeline(pid interface{}, pipeline int, options ..
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pipelines/%d", url.QueryEscape(project), pipeline)
+	u := fmt.Sprintf("projects/%s/pipelines/%d", pathEscape(project), pipeline)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -140,6 +150,30 @@ func (s *PipelinesService) GetPipeline(pid interface{}, pipeline int, options ..
 
 	p := new(Pipeline)
 	resp, err := s.client.Do(req, p)
+	if err != nil {
+		return nil, resp, err
+	}
+
+	return p, resp, err
+}
+
+// GetPipelineVariables gets the variables of a single project pipeline.
+//
+// GitLab API docs: https://docs.gitlab.com/ce/api/pipelines.html#get-variables-of-a-pipeline
+func (s *PipelinesService) GetPipelineVariables(pid interface{}, pipeline int, options ...OptionFunc) ([]*PipelineVariable, *Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, nil, err
+	}
+	u := fmt.Sprintf("projects/%s/pipelines/%d/variables", pathEscape(project), pipeline)
+
+	req, err := s.client.NewRequest("GET", u, nil, options)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var p []*PipelineVariable
+	resp, err := s.client.Do(req, &p)
 	if err != nil {
 		return nil, resp, err
 	}
@@ -163,7 +197,7 @@ func (s *PipelinesService) CreatePipeline(pid interface{}, opt *CreatePipelineOp
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pipeline", url.QueryEscape(project))
+	u := fmt.Sprintf("projects/%s/pipeline", pathEscape(project))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -183,12 +217,12 @@ func (s *PipelinesService) CreatePipeline(pid interface{}, opt *CreatePipelineOp
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/pipelines.html#retry-failed-builds-in-a-pipeline
-func (s *PipelinesService) RetryPipelineBuild(pid interface{}, pipelineID int, options ...OptionFunc) (*Pipeline, *Response, error) {
+func (s *PipelinesService) RetryPipelineBuild(pid interface{}, pipeline int, options ...OptionFunc) (*Pipeline, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pipelines/%d/retry", project, pipelineID)
+	u := fmt.Sprintf("projects/%s/pipelines/%d/retry", pathEscape(project), pipeline)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -208,12 +242,12 @@ func (s *PipelinesService) RetryPipelineBuild(pid interface{}, pipelineID int, o
 //
 // GitLab API docs:
 //https://docs.gitlab.com/ce/api/pipelines.html#cancel-a-pipelines-builds
-func (s *PipelinesService) CancelPipelineBuild(pid interface{}, pipelineID int, options ...OptionFunc) (*Pipeline, *Response, error) {
+func (s *PipelinesService) CancelPipelineBuild(pid interface{}, pipeline int, options ...OptionFunc) (*Pipeline, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pipelines/%d/cancel", project, pipelineID)
+	u := fmt.Sprintf("projects/%s/pipelines/%d/cancel", pathEscape(project), pipeline)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -227,4 +261,23 @@ func (s *PipelinesService) CancelPipelineBuild(pid interface{}, pipelineID int, 
 	}
 
 	return p, resp, err
+}
+
+// DeletePipeline deletes an existing pipeline.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/pipelines.html#delete-a-pipeline
+func (s *PipelinesService) DeletePipeline(pid interface{}, pipeline int, options ...OptionFunc) (*Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, err
+	}
+	u := fmt.Sprintf("projects/%s/pipelines/%d", pathEscape(project), pipeline)
+
+	req, err := s.client.NewRequest("DELETE", u, nil, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Do(req, nil)
 }

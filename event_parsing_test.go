@@ -3,6 +3,8 @@ package gitlab
 import (
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWebhookEventType(t *testing.T) {
@@ -259,8 +261,14 @@ func TestParseIssueHook(t *testing.T) {
     "group_id": 41
   }],
   "changes": {
-    "updated_by_id": [null, 1],
-    "updated_at": ["2017-09-15 16:50:55 UTC", "2017-09-15 16:52:00 UTC"],
+    "updated_by_id": {
+      "previous": null,
+      "current": 1
+    },
+    "updated_at": {
+      "previous": "2017-09-15 16:50:55 UTC", 
+      "current": "2017-09-15 16:52:00 UTC"
+    },
     "labels": {
       "previous": [{
         "id": 206,
@@ -315,6 +323,11 @@ func TestParseIssueHook(t *testing.T) {
 	if event.Assignee.Username != "user1" {
 		t.Errorf("Assignee username is %v, want %v", event.Assignee.Username, "user1")
 	}
+	assert.Equal(t, 1, len(event.Labels))
+	assert.Equal(t, 0, event.Changes.UpdatedByID.Previous)
+	assert.Equal(t, 1, event.Changes.UpdatedByID.Current)
+	assert.Equal(t, 1, len(event.Changes.Labels.Previous))
+	assert.Equal(t, 1, len(event.Changes.Labels.Current))
 }
 
 func TestParseCommitCommentHook(t *testing.T) {
@@ -854,7 +867,10 @@ func TestParseMergeRequestHook(t *testing.T) {
       "previous": null,
       "current": 1
     },
-    "updated_at": ["2017-09-15 16:50:55 UTC", "2017-09-15 16:52:00 UTC"],
+    "updated_at": {
+      "previous": "2017-09-15 16:50:55 UTC", 
+      "current": "2017-09-15 16:52:00 UTC"
+    },
     "labels": {
       "previous": [{
         "id": 206,
@@ -909,6 +925,11 @@ func TestParseMergeRequestHook(t *testing.T) {
 	if event.ObjectAttributes.WorkInProgress {
 		t.Errorf("WorkInProgress is %v, want %v", event.ObjectAttributes.WorkInProgress, false)
 	}
+	assert.Equal(t, 1, len(event.Labels))
+	assert.Equal(t, 0, event.Changes.UpdatedByID.Previous)
+	assert.Equal(t, 1, event.Changes.UpdatedByID.Current)
+	assert.Equal(t, 1, len(event.Changes.Labels.Previous))
+	assert.Equal(t, 1, len(event.Changes.Labels.Current))
 }
 
 func TestParseWikiPageHook(t *testing.T) {
@@ -1071,7 +1092,12 @@ func TestParsePipelineHook(t *testing.T) {
             "username": "root",
             "avatar_url": "http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon"
          },
-         "runner": null,
+         "runner": {
+            "id":380987,
+            "description":"shared-runners-manager-6.gitlab.com",
+            "active":true,
+            "is_shared":true
+         },
          "artifacts_file":{
             "filename": null,
             "size": null
@@ -1092,7 +1118,12 @@ func TestParsePipelineHook(t *testing.T) {
             "username": "root",
             "avatar_url": "http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon"
          },
-         "runner": null,
+         "runner": {
+            "id":380987,
+            "description":"shared-runners-manager-6.gitlab.com",
+            "active":true,
+            "is_shared":true
+         },
          "artifacts_file":{
             "filename": null,
             "size": null
@@ -1113,7 +1144,12 @@ func TestParsePipelineHook(t *testing.T) {
             "username": "root",
             "avatar_url": "http://www.gravatar.com/avatar/e32bd13e2add097461cb96824b7a829c?s=80\u0026d=identicon"
          },
-         "runner": null,
+         "runner": {
+            "id":380987,
+            "description":"shared-runners-manager-6.gitlab.com",
+            "active":true,
+            "is_shared":true
+         },
          "artifacts_file":{
             "filename": null,
             "size": null
@@ -1236,7 +1272,7 @@ func TestParseBuildHook(t *testing.T) {
 		t.Errorf("BuildAllowFailure is %v, want %v", event.BuildAllowFailure, false)
 	}
 
-	if event.Commit.Sha != "2293ada6b400935a1378653304eaf6221e0fdb8f" {
-		t.Errorf("Commit SHA is %v, want %v", event.Commit.Sha, "2293ada6b400935a1378653304eaf6221e0fdb8f")
+	if event.Commit.SHA != "2293ada6b400935a1378653304eaf6221e0fdb8f" {
+		t.Errorf("Commit SHA is %v, want %v", event.Commit.SHA, "2293ada6b400935a1378653304eaf6221e0fdb8f")
 	}
 }

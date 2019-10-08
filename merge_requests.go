@@ -18,7 +18,6 @@ package gitlab
 
 import (
 	"fmt"
-	"net/url"
 	"time"
 )
 
@@ -35,65 +34,43 @@ type MergeRequestsService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/merge_requests.html
 type MergeRequest struct {
-	ID           int        `json:"id"`
-	IID          int        `json:"iid"`
-	TargetBranch string     `json:"target_branch"`
-	SourceBranch string     `json:"source_branch"`
-	ProjectID    int        `json:"project_id"`
-	Title        string     `json:"title"`
-	State        string     `json:"state"`
-	CreatedAt    *time.Time `json:"created_at"`
-	UpdatedAt    *time.Time `json:"updated_at"`
-	Upvotes      int        `json:"upvotes"`
-	Downvotes    int        `json:"downvotes"`
-	Author       struct {
-		ID        int        `json:"id"`
-		Username  string     `json:"username"`
-		Name      string     `json:"name"`
-		State     string     `json:"state"`
-		CreatedAt *time.Time `json:"created_at"`
-	} `json:"author"`
-	Assignee struct {
-		ID        int        `json:"id"`
-		Username  string     `json:"username"`
-		Name      string     `json:"name"`
-		State     string     `json:"state"`
-		CreatedAt *time.Time `json:"created_at"`
-	} `json:"assignee"`
-	SourceProjectID           int        `json:"source_project_id"`
-	TargetProjectID           int        `json:"target_project_id"`
-	Labels                    []string   `json:"labels"`
-	Description               string     `json:"description"`
-	WorkInProgress            bool       `json:"work_in_progress"`
-	Milestone                 *Milestone `json:"milestone"`
-	MergeWhenPipelineSucceeds bool       `json:"merge_when_pipeline_succeeds"`
-	MergeStatus               string     `json:"merge_status"`
-	MergedBy                  struct {
-		ID        int        `json:"id"`
-		Username  string     `json:"username"`
-		Name      string     `json:"name"`
-		State     string     `json:"state"`
-		CreatedAt *time.Time `json:"created_at"`
-	} `json:"merged_by"`
-	MergedAt *time.Time `json:"merged_at"`
-	ClosedBy struct {
-		ID        int        `json:"id"`
-		Username  string     `json:"username"`
-		Name      string     `json:"name"`
-		State     string     `json:"state"`
-		CreatedAt *time.Time `json:"created_at"`
-	} `json:"closed_by"`
-	ClosedAt                 *time.Time `json:"closed_at"`
-	Subscribed               bool       `json:"subscribed"`
-	SHA                      string     `json:"sha"`
-	MergeCommitSHA           string     `json:"merge_commit_sha"`
-	UserNotesCount           int        `json:"user_notes_count"`
-	ChangesCount             string     `json:"changes_count"`
-	ShouldRemoveSourceBranch bool       `json:"should_remove_source_branch"`
-	ForceRemoveSourceBranch  bool       `json:"force_remove_source_branch"`
-	WebURL                   string     `json:"web_url"`
-	DiscussionLocked         bool       `json:"discussion_locked"`
-	Changes                  []struct {
+	ID                        int          `json:"id"`
+	IID                       int          `json:"iid"`
+	TargetBranch              string       `json:"target_branch"`
+	SourceBranch              string       `json:"source_branch"`
+	ProjectID                 int          `json:"project_id"`
+	Title                     string       `json:"title"`
+	State                     string       `json:"state"`
+	CreatedAt                 *time.Time   `json:"created_at"`
+	UpdatedAt                 *time.Time   `json:"updated_at"`
+	Upvotes                   int          `json:"upvotes"`
+	Downvotes                 int          `json:"downvotes"`
+	Author                    *BasicUser   `json:"author"`
+	Assignee                  *BasicUser   `json:"assignee"`
+	Assignees                 []*BasicUser `json:"assignees"`
+	SourceProjectID           int          `json:"source_project_id"`
+	TargetProjectID           int          `json:"target_project_id"`
+	Labels                    []string     `json:"labels"`
+	Description               string       `json:"description"`
+	WorkInProgress            bool         `json:"work_in_progress"`
+	Milestone                 *Milestone   `json:"milestone"`
+	MergeWhenPipelineSucceeds bool         `json:"merge_when_pipeline_succeeds"`
+	MergeStatus               string       `json:"merge_status"`
+	MergeError                string       `json:"merge_error"`
+	MergedBy                  *BasicUser   `json:"merged_by"`
+	MergedAt                  *time.Time   `json:"merged_at"`
+	ClosedBy                  *BasicUser   `json:"closed_by"`
+	ClosedAt                  *time.Time   `json:"closed_at"`
+	Subscribed                bool         `json:"subscribed"`
+	SHA                       string       `json:"sha"`
+	MergeCommitSHA            string       `json:"merge_commit_sha"`
+	UserNotesCount            int          `json:"user_notes_count"`
+	ChangesCount              string       `json:"changes_count"`
+	ShouldRemoveSourceBranch  bool         `json:"should_remove_source_branch"`
+	ForceRemoveSourceBranch   bool         `json:"force_remove_source_branch"`
+	WebURL                    string       `json:"web_url"`
+	DiscussionLocked          bool         `json:"discussion_locked"`
+	Changes                   []struct {
 		OldPath     string `json:"old_path"`
 		NewPath     string `json:"new_path"`
 		AMode       string `json:"a_mode"`
@@ -103,14 +80,23 @@ type MergeRequest struct {
 		RenamedFile bool   `json:"renamed_file"`
 		DeletedFile bool   `json:"deleted_file"`
 	} `json:"changes"`
-	TimeStats *TimeStats `json:"time_stats"`
-	Squash    bool       `json:"squash"`
-	Pipeline  struct {
-		ID     int    `json:"id"`
-		Ref    string `json:"ref"`
-		SHA    string `json:"sha"`
-		Status string `json:"status"`
-	} `json:"pipeline"`
+	TimeStats    *TimeStats    `json:"time_stats"`
+	Squash       bool          `json:"squash"`
+	Pipeline     *PipelineInfo `json:"pipeline"`
+	HeadPipeline *Pipeline     `json:"head_pipeline"`
+	DiffRefs     struct {
+		BaseSha  string `json:"base_sha"`
+		HeadSha  string `json:"head_sha"`
+		StartSha string `json:"start_sha"`
+	} `json:"diff_refs"`
+	DivergedCommitsCount int    `json:"diverged_commits_count"`
+	RebaseInProgress     bool   `json:"rebase_in_progress"`
+	ApprovalsBeforeMerge int    `json:"approvals_before_merge"`
+	Reference            string `json:"reference"`
+	TaskCompletionStatus struct {
+		Count          int `json:"count"`
+		CompletedCount int `json:"completed_count"`
+	} `json:"task_completion_status"`
 }
 
 func (m MergeRequest) String() string {
@@ -162,6 +148,8 @@ type ListMergeRequestsOptions struct {
 	SourceBranch    *string    `url:"source_branch,omitempty" json:"source_branch,omitempty"`
 	TargetBranch    *string    `url:"target_branch,omitempty" json:"target_branch,omitempty"`
 	Search          *string    `url:"search,omitempty" json:"search,omitempty"`
+	In              *string    `url:"in,omitempty" json:"in,omitempty"`
+	WIP             *string    `url:"wip,omitempty" json:"wip,omitempty"`
 }
 
 // ListMergeRequests gets all merge requests. The state parameter can be used
@@ -221,7 +209,7 @@ func (s *MergeRequestsService) ListGroupMergeRequests(gid interface{}, opt *List
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/merge_requests", url.QueryEscape(group))
+	u := fmt.Sprintf("groups/%s/merge_requests", pathEscape(group))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -262,6 +250,7 @@ type ListProjectMergeRequestsOptions struct {
 	SourceBranch    *string    `url:"source_branch,omitempty" json:"source_branch,omitempty"`
 	TargetBranch    *string    `url:"target_branch,omitempty" json:"target_branch,omitempty"`
 	Search          *string    `url:"search,omitempty" json:"search,omitempty"`
+	WIP             *string    `url:"wip,omitempty" json:"wip,omitempty"`
 }
 
 // ListProjectMergeRequests gets all merge requests for this project.
@@ -273,7 +262,7 @@ func (s *MergeRequestsService) ListProjectMergeRequests(pid interface{}, opt *Li
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests", url.QueryEscape(project))
+	u := fmt.Sprintf("projects/%s/merge_requests", pathEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -289,18 +278,29 @@ func (s *MergeRequestsService) ListProjectMergeRequests(pid interface{}, opt *Li
 	return m, resp, err
 }
 
+// GetMergeRequestsOptions represents the available GetMergeRequests()
+// options.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/merge_requests.html#get-single-mr
+type GetMergeRequestsOptions struct {
+	RenderHTML                  *bool `url:"render_html,omitempty" json:"render_html,omitempty"`
+	IncludeDivergedCommitsCount *bool `url:"include_diverged_commits_count,omitempty" json:"include_diverged_commits_count,omitempty"`
+	IncludeRebaseInProgress     *bool `url:"include_rebase_in_progress,omitempty" json:"include_rebase_in_progress,omitempty"`
+}
+
 // GetMergeRequest shows information about a single merge request.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/merge_requests.html#get-single-mr
-func (s *MergeRequestsService) GetMergeRequest(pid interface{}, mergeRequest int, options ...OptionFunc) (*MergeRequest, *Response, error) {
+func (s *MergeRequestsService) GetMergeRequest(pid interface{}, mergeRequest int, opt *GetMergeRequestsOptions, options ...OptionFunc) (*MergeRequest, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d", pathEscape(project), mergeRequest)
 
-	req, err := s.client.NewRequest("GET", u, nil, options)
+	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -323,7 +323,7 @@ func (s *MergeRequestsService) GetMergeRequestApprovals(pid interface{}, mergeRe
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/approvals", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/approvals", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -355,7 +355,7 @@ func (s *MergeRequestsService) GetMergeRequestCommits(pid interface{}, mergeRequ
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/commits", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/commits", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -381,7 +381,7 @@ func (s *MergeRequestsService) GetMergeRequestChanges(pid interface{}, mergeRequ
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/changes", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/changes", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -401,19 +401,19 @@ func (s *MergeRequestsService) GetMergeRequestChanges(pid interface{}, mergeRequ
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/merge_requests.html#list-mr-pipelines
-func (s *MergeRequestsService) ListMergeRequestPipelines(pid interface{}, mergeRequest int, options ...OptionFunc) (PipelineList, *Response, error) {
+func (s *MergeRequestsService) ListMergeRequestPipelines(pid interface{}, mergeRequest int, options ...OptionFunc) ([]*PipelineInfo, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/pipelines", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/pipelines", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	var p PipelineList
+	var p []*PipelineInfo
 	resp, err := s.client.Do(req, &p)
 	if err != nil {
 		return nil, resp, err
@@ -439,7 +439,7 @@ func (s *MergeRequestsService) GetIssuesClosedOnMerge(pid interface{}, mergeRequ
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("/projects/%s/merge_requests/%d/closes_issues", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/closes_issues", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -467,6 +467,7 @@ type CreateMergeRequestOptions struct {
 	TargetBranch       *string `url:"target_branch,omitempty" json:"target_branch,omitempty"`
 	Labels             Labels  `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	AssigneeID         *int    `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
+	AssigneeIDs        []int   `url:"assignee_ids,omitempty" json:"assignee_ids,omitempty"`
 	TargetProjectID    *int    `url:"target_project_id,omitempty" json:"target_project_id,omitempty"`
 	MilestoneID        *int    `url:"milestone_id,omitempty" json:"milestone_id,omitempty"`
 	RemoveSourceBranch *bool   `url:"remove_source_branch,omitempty" json:"remove_source_branch,omitempty"`
@@ -483,7 +484,7 @@ func (s *MergeRequestsService) CreateMergeRequest(pid interface{}, opt *CreateMe
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests", url.QueryEscape(project))
+	u := fmt.Sprintf("projects/%s/merge_requests", pathEscape(project))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -509,6 +510,7 @@ type UpdateMergeRequestOptions struct {
 	Description        *string `url:"description,omitempty" json:"description,omitempty"`
 	TargetBranch       *string `url:"target_branch,omitempty" json:"target_branch,omitempty"`
 	AssigneeID         *int    `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
+	AssigneeIDs        []int   `url:"assignee_ids,omitempty" json:"assignee_ids,omitempty"`
 	Labels             Labels  `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	MilestoneID        *int    `url:"milestone_id,omitempty" json:"milestone_id,omitempty"`
 	StateEvent         *string `url:"state_event,omitempty" json:"state_event,omitempty"`
@@ -527,7 +529,7 @@ func (s *MergeRequestsService) UpdateMergeRequest(pid interface{}, mergeRequest 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -552,7 +554,7 @@ func (s *MergeRequestsService) DeleteMergeRequest(pid interface{}, mergeRequest 
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {
@@ -569,9 +571,11 @@ func (s *MergeRequestsService) DeleteMergeRequest(pid interface{}, mergeRequest 
 // https://docs.gitlab.com/ce/api/merge_requests.html#accept-mr
 type AcceptMergeRequestOptions struct {
 	MergeCommitMessage        *string `url:"merge_commit_message,omitempty" json:"merge_commit_message,omitempty"`
+	SquashCommitMessage       *string `url:"squash_commit_message,omitempty" json:"squash_commit_message,omitempty"`
+	Squash                    *bool   `url:"squash,omitempty" json:"squash,omitempty"`
 	ShouldRemoveSourceBranch  *bool   `url:"should_remove_source_branch,omitempty" json:"should_remove_source_branch,omitempty"`
 	MergeWhenPipelineSucceeds *bool   `url:"merge_when_pipeline_succeeds,omitempty" json:"merge_when_pipeline_succeeds,omitempty"`
-	Sha                       *string `url:"sha,omitempty" json:"sha,omitempty"`
+	SHA                       *string `url:"sha,omitempty" json:"sha,omitempty"`
 }
 
 // AcceptMergeRequest merges changes submitted with MR using this API. If merge
@@ -586,7 +590,7 @@ func (s *MergeRequestsService) AcceptMergeRequest(pid interface{}, mergeRequest 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/merge", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/merge", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -615,7 +619,7 @@ func (s *MergeRequestsService) CancelMergeWhenPipelineSucceeds(pid interface{}, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/cancel_merge_when_pipeline_succeeds", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/cancel_merge_when_pipeline_succeeds", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("PUT", u, nil, options)
 	if err != nil {
@@ -629,6 +633,27 @@ func (s *MergeRequestsService) CancelMergeWhenPipelineSucceeds(pid interface{}, 
 	}
 
 	return m, resp, err
+}
+
+// RebaseMergeRequest automatically rebases the source_branch of the merge
+// request against its target_branch. If you don’t have permissions to push
+// to the merge request’s source branch, you’ll get a 403 Forbidden response.
+//
+// GitLab API docs:
+// https://docs.gitlab.com/ce/api/merge_requests.html#rebase-a-merge-request
+func (s *MergeRequestsService) RebaseMergeRequest(pid interface{}, mergeRequest int, options ...OptionFunc) (*Response, error) {
+	project, err := parseID(pid)
+	if err != nil {
+		return nil, err
+	}
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/rebase", pathEscape(project), mergeRequest)
+
+	req, err := s.client.NewRequest("PUT", u, nil, options)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.client.Do(req, nil)
 }
 
 // GetMergeRequestDiffVersionsOptions represents the available
@@ -647,7 +672,7 @@ func (s *MergeRequestsService) GetMergeRequestDiffVersions(pid interface{}, merg
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/versions", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/versions", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -672,7 +697,7 @@ func (s *MergeRequestsService) GetSingleMergeRequestDiffVersion(pid interface{},
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/versions/%d", url.QueryEscape(project), mergeRequest, version)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/versions/%d", pathEscape(project), mergeRequest, version)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -699,7 +724,7 @@ func (s *MergeRequestsService) SubscribeToMergeRequest(pid interface{}, mergeReq
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/subscribe", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/subscribe", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -727,7 +752,7 @@ func (s *MergeRequestsService) UnsubscribeFromMergeRequest(pid interface{}, merg
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/unsubscribe", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/unsubscribe", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -754,7 +779,7 @@ func (s *MergeRequestsService) CreateTodo(pid interface{}, mergeRequest int, opt
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/merge_requests/%d/todo", url.QueryEscape(project), mergeRequest)
+	u := fmt.Sprintf("projects/%s/merge_requests/%d/todo", pathEscape(project), mergeRequest)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
