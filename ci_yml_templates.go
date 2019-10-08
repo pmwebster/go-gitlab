@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 )
 
 // CIYMLTemplatesService handles communication with the gitlab
@@ -52,7 +53,7 @@ func (s *CIYMLTemplatesService) ListAllTemplates(opt *ListCIYMLTemplatesOptions,
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/templates/gitlab_ci_ymls.html#single-gitlab-ci-yml-template
 func (s *CIYMLTemplatesService) GetTemplate(key string, options ...OptionFunc) (*CIYMLTemplate, *Response, error) {
-	u := fmt.Sprintf("templates/gitlab_ci_ymls/%s", pathEscape(key))
+	u := fmt.Sprintf("templates/gitlab_ci_ymls/%s", url.QueryEscape(key))
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {

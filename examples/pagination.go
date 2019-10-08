@@ -30,7 +30,7 @@ func pagination() {
 		}
 
 		// Exit the loop when we've seen all pages.
-		if resp.CurrentPage >= resp.TotalPages {
+		if opt.Page >= resp.TotalPages {
 			break
 		}
 

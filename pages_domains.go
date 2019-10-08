@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -44,7 +45,7 @@ func (s *PagesDomainsService) ListPagesDomains(pid interface{}, opt *ListPagesDo
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pages/domains", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/pages/domains", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -88,7 +89,7 @@ func (s *PagesDomainsService) GetPagesDomain(pid interface{}, domain string, opt
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pages/domains/%s", pathEscape(project), domain)
+	u := fmt.Sprintf("projects/%s/pages/domains/%s", url.QueryEscape(project), domain)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -123,7 +124,7 @@ func (s *PagesDomainsService) CreatePagesDomain(pid interface{}, opt *CreatePage
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pages/domains", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/pages/domains", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -157,7 +158,7 @@ func (s *PagesDomainsService) UpdatePagesDomain(pid interface{}, domain string, 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pages/domains/%s", pathEscape(project), domain)
+	u := fmt.Sprintf("projects/%s/pages/domains/%s", url.QueryEscape(project), domain)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -182,7 +183,7 @@ func (s *PagesDomainsService) DeletePagesDomain(pid interface{}, domain string, 
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/pages/domains/%s", pathEscape(project), domain)
+	u := fmt.Sprintf("projects/%s/pages/domains/%s", url.QueryEscape(project), domain)
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {

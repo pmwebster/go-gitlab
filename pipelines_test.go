@@ -22,7 +22,7 @@ func TestListProjectPipelines(t *testing.T) {
 		t.Errorf("Pipelines.ListProjectPipelines returned error: %v", err)
 	}
 
-	want := []*PipelineInfo{{ID: 1}, {ID: 2}}
+	want := PipelineList{{ID: 1}, {ID: 2}}
 	if !reflect.DeepEqual(want, piplines) {
 		t.Errorf("Pipelines.ListProjectPipelines returned %+v, want %+v", piplines, want)
 	}
@@ -45,26 +45,6 @@ func TestGetPipeline(t *testing.T) {
 	want := &Pipeline{ID: 1, Status: "success"}
 	if !reflect.DeepEqual(want, pipeline) {
 		t.Errorf("Pipelines.GetPipeline returned %+v, want %+v", pipeline, want)
-	}
-}
-
-func TestGetPipelineVariables(t *testing.T) {
-	mux, server, client := setup()
-	defer teardown(server)
-
-	mux.HandleFunc("/api/v4/projects/1/pipelines/5949167/variables", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		fmt.Fprint(w, `[{"key":"RUN_NIGHTLY_BUILD","variable_type":"env_var","value":"true"},{"key":"foo","value":"bar"}]`)
-	})
-
-	variables, _, err := client.Pipelines.GetPipelineVariables(1, 5949167)
-	if err != nil {
-		t.Errorf("Pipelines.GetPipelineVariables returned error: %v", err)
-	}
-
-	want := []*PipelineVariable{{Key: "RUN_NIGHTLY_BUILD", Value: "true"}, {Key: "foo", Value: "bar"}}
-	if !reflect.DeepEqual(want, variables) {
-		t.Errorf("Pipelines.GetPipelineVariables returned %+v, want %+v", variables, want)
 	}
 }
 
@@ -128,20 +108,4 @@ func TestCancelPipelineBuild(t *testing.T) {
 	if !reflect.DeepEqual(want, pipeline) {
 		t.Errorf("Pipelines.CancelPipelineBuild returned %+v, want %+v", pipeline, want)
 	}
-}
-
-func TestDeletePipeline(t *testing.T) {
-	mux, server, client := setup()
-	defer teardown(server)
-
-	mux.HandleFunc("/api/v4/projects/1/pipelines/5949167", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "DELETE")
-	})
-
-	_, err := client.Pipelines.DeletePipeline("1", 5949167)
-
-	if err != nil {
-		t.Errorf("Pipelines.DeletePipeline returned error: %v", err)
-	}
-
 }

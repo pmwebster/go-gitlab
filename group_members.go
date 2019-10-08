@@ -18,6 +18,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 )
 
 // GroupMembersService handles communication with the group members
@@ -53,7 +54,7 @@ type ListGroupMembersOptions struct {
 }
 
 // ListGroupMembers get a list of group members viewable by the authenticated
-// user. Inherited members through ancestor groups are not included.
+// user. Returns a list including inherited members through ancestor groups.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/members.html#list-all-members-of-a-group-or-project
@@ -62,7 +63,7 @@ func (s *GroupsService) ListGroupMembers(gid interface{}, opt *ListGroupMembersO
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/members", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -88,7 +89,7 @@ func (s *GroupsService) ListAllGroupMembers(gid interface{}, opt *ListGroupMembe
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/all", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/members/all", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -123,7 +124,7 @@ func (s *GroupMembersService) GetGroupMember(gid interface{}, user int, options 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/members/%d", url.QueryEscape(group), user)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -148,7 +149,7 @@ func (s *GroupMembersService) AddGroupMember(gid interface{}, opt *AddGroupMembe
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/members", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -183,7 +184,7 @@ func (s *GroupMembersService) EditGroupMember(gid interface{}, user int, opt *Ed
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/members/%d", url.QueryEscape(group), user)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -208,7 +209,7 @@ func (s *GroupMembersService) RemoveGroupMember(gid interface{}, user int, optio
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/members/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/members/%d", url.QueryEscape(group), user)
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {

@@ -33,16 +33,16 @@ type TagsService struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/tags.html
 type Tag struct {
-	Commit  *Commit      `json:"commit"`
-	Release *ReleaseNote `json:"release"`
-	Name    string       `json:"name"`
-	Message string       `json:"message"`
+	Commit  *Commit  `json:"commit"`
+	Release *Release `json:"release"`
+	Name    string   `json:"name"`
+	Message string   `json:"message"`
 }
 
-// ReleaseNote represents a GitLab version release.
+// Release represents a GitLab version release.
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/tags.html
-type ReleaseNote struct {
+type Release struct {
 	TagName     string `json:"tag_name"`
 	Description string `json:"description"`
 }
@@ -71,7 +71,7 @@ func (s *TagsService) ListTags(pid interface{}, opt *ListTagsOptions, options ..
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/tags", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -97,7 +97,7 @@ func (s *TagsService) GetTag(pid interface{}, tag string, options ...OptionFunc)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s", url.QueryEscape(project), url.QueryEscape(tag))
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -118,10 +118,9 @@ func (s *TagsService) GetTag(pid interface{}, tag string, options ...OptionFunc)
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/tags.html#create-a-new-tag
 type CreateTagOptions struct {
-	TagName *string `url:"tag_name,omitempty" json:"tag_name,omitempty"`
-	Ref     *string `url:"ref,omitempty" json:"ref,omitempty"`
-	Message *string `url:"message,omitempty" json:"message,omitempty"`
-	// ReleaseDescription parameter was deprecated in GitLab 11.7
+	TagName            *string `url:"tag_name,omitempty" json:"tag_name,omitempty"`
+	Ref                *string `url:"ref,omitempty" json:"ref,omitempty"`
+	Message            *string `url:"message,omitempty" json:"message,omitempty"`
 	ReleaseDescription *string `url:"release_description:omitempty" json:"release_description,omitempty"`
 }
 
@@ -134,7 +133,7 @@ func (s *TagsService) CreateTag(pid interface{}, opt *CreateTagOptions, options 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/repository/tags", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -159,7 +158,7 @@ func (s *TagsService) DeleteTag(pid interface{}, tag string, options ...OptionFu
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s", url.QueryEscape(project), url.QueryEscape(tag))
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {
@@ -169,36 +168,32 @@ func (s *TagsService) DeleteTag(pid interface{}, tag string, options ...OptionFu
 	return s.client.Do(req, nil)
 }
 
-// CreateReleaseNoteOptions represents the available CreateReleaseNote() options.
-//
-// Deprecated: This feature was deprecated in GitLab 11.7.
+// CreateReleaseOptions represents the available CreateRelease() options.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/tags.html#create-a-new-release
-type CreateReleaseNoteOptions struct {
+type CreateReleaseOptions struct {
 	Description *string `url:"description:omitempty" json:"description,omitempty"`
 }
 
-// CreateReleaseNote Add release notes to the existing git tag.
+// CreateRelease Add release notes to the existing git tag.
 // If there already exists a release for the given tag, status code 409 is returned.
-//
-// Deprecated: This feature was deprecated in GitLab 11.7.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/tags.html#create-a-new-release
-func (s *TagsService) CreateReleaseNote(pid interface{}, tag string, opt *CreateReleaseNoteOptions, options ...OptionFunc) (*ReleaseNote, *Response, error) {
+func (s *TagsService) CreateRelease(pid interface{}, tag string, opt *CreateReleaseOptions, options ...OptionFunc) (*Release, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", url.QueryEscape(project), url.QueryEscape(tag))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	r := new(ReleaseNote)
+	r := new(Release)
 	resp, err := s.client.Do(req, r)
 	if err != nil {
 		return nil, resp, err
@@ -207,33 +202,31 @@ func (s *TagsService) CreateReleaseNote(pid interface{}, tag string, opt *Create
 	return r, resp, err
 }
 
-// UpdateReleaseNoteOptions represents the available UpdateReleaseNote() options.
+// UpdateReleaseOptions represents the available UpdateRelease() options.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/tags.html#update-a-release
-type UpdateReleaseNoteOptions struct {
+type UpdateReleaseOptions struct {
 	Description *string `url:"description:omitempty" json:"description,omitempty"`
 }
 
-// UpdateReleaseNote Updates the release notes of a given release.
-//
-// Deprecated: This feature was deprecated in GitLab 11.7.
+// UpdateRelease Updates the release notes of a given release.
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/tags.html#update-a-release
-func (s *TagsService) UpdateReleaseNote(pid interface{}, tag string, opt *UpdateReleaseNoteOptions, options ...OptionFunc) (*ReleaseNote, *Response, error) {
+func (s *TagsService) UpdateRelease(pid interface{}, tag string, opt *UpdateReleaseOptions, options ...OptionFunc) (*Release, *Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", pathEscape(project), url.PathEscape(tag))
+	u := fmt.Sprintf("projects/%s/repository/tags/%s/release", url.QueryEscape(project), url.QueryEscape(tag))
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	r := new(ReleaseNote)
+	r := new(Release)
 	resp, err := s.client.Do(req, r)
 	if err != nil {
 		return nil, resp, err

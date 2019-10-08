@@ -19,6 +19,7 @@ package gitlab
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -64,33 +65,32 @@ type IssueLinks struct {
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/issues.html
 type Issue struct {
-	ID                int              `json:"id"`
-	IID               int              `json:"iid"`
-	ProjectID         int              `json:"project_id"`
-	Milestone         *Milestone       `json:"milestone"`
-	Author            *IssueAuthor     `json:"author"`
-	Description       string           `json:"description"`
-	State             string           `json:"state"`
-	Assignees         []*IssueAssignee `json:"assignees"`
-	Assignee          *IssueAssignee   `json:"assignee"`
-	Upvotes           int              `json:"upvotes"`
-	Downvotes         int              `json:"downvotes"`
-	Labels            []string         `json:"labels"`
-	Title             string           `json:"title"`
-	UpdatedAt         *time.Time       `json:"updated_at"`
-	CreatedAt         *time.Time       `json:"created_at"`
-	ClosedAt          *time.Time       `json:"closed_at"`
-	Subscribed        bool             `json:"subscribed"`
-	UserNotesCount    int              `json:"user_notes_count"`
-	DueDate           *ISOTime         `json:"due_date"`
-	WebURL            string           `json:"web_url"`
-	TimeStats         *TimeStats       `json:"time_stats"`
-	Confidential      bool             `json:"confidential"`
-	Weight            int              `json:"weight"`
-	DiscussionLocked  bool             `json:"discussion_locked"`
-	Links             *IssueLinks      `json:"_links"`
-	IssueLinkID       int              `json:"issue_link_id"`
-	MergeRequestCount int              `json:"merge_requests_count"`
+	ID               int              `json:"id"`
+	IID              int              `json:"iid"`
+	ProjectID        int              `json:"project_id"`
+	Milestone        *Milestone       `json:"milestone"`
+	Author           *IssueAuthor     `json:"author"`
+	Description      string           `json:"description"`
+	State            string           `json:"state"`
+	Assignees        []*IssueAssignee `json:"assignees"`
+	Assignee         *IssueAssignee   `json:"assignee"`
+	Upvotes          int              `json:"upvotes"`
+	Downvotes        int              `json:"downvotes"`
+	Labels           []string         `json:"labels"`
+	Title            string           `json:"title"`
+	UpdatedAt        *time.Time       `json:"updated_at"`
+	CreatedAt        *time.Time       `json:"created_at"`
+	ClosedAt         *time.Time       `json:"closed_at"`
+	Subscribed       bool             `json:"subscribed"`
+	UserNotesCount   int              `json:"user_notes_count"`
+	DueDate          *ISOTime         `json:"due_date"`
+	WebURL           string           `json:"web_url"`
+	TimeStats        *TimeStats       `json:"time_stats"`
+	Confidential     bool             `json:"confidential"`
+	Weight           int              `json:"weight"`
+	DiscussionLocked bool             `json:"discussion_locked"`
+	Links            *IssueLinks      `json:"_links"`
+	IssueLinkID      int              `json:"issue_link_id"`
 }
 
 func (i Issue) String() string {
@@ -110,23 +110,21 @@ func (l *Labels) MarshalJSON() ([]byte, error) {
 // GitLab API docs: https://docs.gitlab.com/ce/api/issues.html#list-issues
 type ListIssuesOptions struct {
 	ListOptions
-	State            *string    `url:"state,omitempty" json:"state,omitempty"`
-	Labels           Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
-	WithLabelDetails *bool      `url:"with_labels_details,omitempty" json:"with_labels_details,omitempty"`
-	Milestone        *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
-	Scope            *string    `url:"scope,omitempty" json:"scope,omitempty"`
-	AuthorID         *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
-	AssigneeID       *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	MyReactionEmoji  *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
-	IIDs             []int      `url:"iids[],omitempty" json:"iids,omitempty"`
-	OrderBy          *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
-	Sort             *string    `url:"sort,omitempty" json:"sort,omitempty"`
-	Search           *string    `url:"search,omitempty" json:"search,omitempty"`
-	CreatedAfter     *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
-	CreatedBefore    *time.Time `url:"created_before,omitempty" json:"created_before,omitempty"`
-	UpdatedAfter     *time.Time `url:"updated_after,omitempty" json:"updated_after,omitempty"`
-	UpdatedBefore    *time.Time `url:"updated_before,omitempty" json:"updated_before,omitempty"`
-	Confidential     *bool      `url:"confidential,omitempty" json:"confidential,omitempty"`
+	State           *string    `url:"state,omitempty" json:"state,omitempty"`
+	Labels          Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	Milestone       *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
+	Scope           *string    `url:"scope,omitempty" json:"scope,omitempty"`
+	AuthorID        *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
+	AssigneeID      *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
+	MyReactionEmoji *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
+	IIDs            []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	OrderBy         *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
+	Sort            *string    `url:"sort,omitempty" json:"sort,omitempty"`
+	Search          *string    `url:"search,omitempty" json:"search,omitempty"`
+	CreatedAfter    *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
+	CreatedBefore   *time.Time `url:"created_before,omitempty" json:"created_before,omitempty"`
+	UpdatedAfter    *time.Time `url:"updated_after,omitempty" json:"updated_after,omitempty"`
+	UpdatedBefore   *time.Time `url:"updated_before,omitempty" json:"updated_before,omitempty"`
 }
 
 // ListIssues gets all issues created by authenticated user. This function
@@ -164,7 +162,6 @@ type ListGroupIssuesOptions struct {
 	OrderBy         *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
 	Sort            *string    `url:"sort,omitempty" json:"sort,omitempty"`
 	Search          *string    `url:"search,omitempty" json:"search,omitempty"`
-	In              *string    `url:"in,omitempty" json:"in,omitempty"`
 	CreatedAfter    *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
 	CreatedBefore   *time.Time `url:"created_before,omitempty" json:"created_before,omitempty"`
 	UpdatedAfter    *time.Time `url:"updated_after,omitempty" json:"updated_after,omitempty"`
@@ -180,7 +177,7 @@ func (s *IssuesService) ListGroupIssues(pid interface{}, opt *ListGroupIssuesOpt
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/issues", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/issues", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -201,24 +198,21 @@ func (s *IssuesService) ListGroupIssues(pid interface{}, opt *ListGroupIssuesOpt
 // GitLab API docs: https://docs.gitlab.com/ce/api/issues.html#list-project-issues
 type ListProjectIssuesOptions struct {
 	ListOptions
-	IIDs             []int      `url:"iids[],omitempty" json:"iids,omitempty"`
-	State            *string    `url:"state,omitempty" json:"state,omitempty"`
-	Labels           Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
-	WithLabelDetails *bool      `url:"with_labels_details,omitempty" json:"with_labels_details,omitempty"`
-	Milestone        *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
-	Scope            *string    `url:"scope,omitempty" json:"scope,omitempty"`
-	AuthorID         *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
-	AssigneeID       *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
-	MyReactionEmoji  *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
-	OrderBy          *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
-	Sort             *string    `url:"sort,omitempty" json:"sort,omitempty"`
-	Search           *string    `url:"search,omitempty" json:"search,omitempty"`
-	In               *string    `url:"in,omitempty" json:"in,omitempty"`
-	CreatedAfter     *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
-	CreatedBefore    *time.Time `url:"created_before,omitempty" json:"created_before,omitempty"`
-	UpdatedAfter     *time.Time `url:"updated_after,omitempty" json:"updated_after,omitempty"`
-	UpdatedBefore    *time.Time `url:"updated_before,omitempty" json:"updated_before,omitempty"`
-	Confidential     *bool      `url:"confidential,omitempty" json:"confidential,omitempty"`
+	IIDs            []int      `url:"iids[],omitempty" json:"iids,omitempty"`
+	State           *string    `url:"state,omitempty" json:"state,omitempty"`
+	Labels          Labels     `url:"labels,comma,omitempty" json:"labels,omitempty"`
+	Milestone       *string    `url:"milestone,omitempty" json:"milestone,omitempty"`
+	Scope           *string    `url:"scope,omitempty" json:"scope,omitempty"`
+	AuthorID        *int       `url:"author_id,omitempty" json:"author_id,omitempty"`
+	AssigneeID      *int       `url:"assignee_id,omitempty" json:"assignee_id,omitempty"`
+	MyReactionEmoji *string    `url:"my_reaction_emoji,omitempty" json:"my_reaction_emoji,omitempty"`
+	OrderBy         *string    `url:"order_by,omitempty" json:"order_by,omitempty"`
+	Sort            *string    `url:"sort,omitempty" json:"sort,omitempty"`
+	Search          *string    `url:"search,omitempty" json:"search,omitempty"`
+	CreatedAfter    *time.Time `url:"created_after,omitempty" json:"created_after,omitempty"`
+	CreatedBefore   *time.Time `url:"created_before,omitempty" json:"created_before,omitempty"`
+	UpdatedAfter    *time.Time `url:"updated_after,omitempty" json:"updated_after,omitempty"`
+	UpdatedBefore   *time.Time `url:"updated_before,omitempty" json:"updated_before,omitempty"`
 }
 
 // ListProjectIssues gets a list of project issues. This function accepts
@@ -230,7 +224,7 @@ func (s *IssuesService) ListProjectIssues(pid interface{}, opt *ListProjectIssue
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/issues", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -254,7 +248,7 @@ func (s *IssuesService) GetIssue(pid interface{}, issue int, options ...OptionFu
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d", url.QueryEscape(project), issue)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -274,7 +268,6 @@ func (s *IssuesService) GetIssue(pid interface{}, issue int, options ...OptionFu
 //
 // GitLab API docs: https://docs.gitlab.com/ce/api/issues.html#new-issues
 type CreateIssueOptions struct {
-	IID                                *int       `url:"iid,omitempty" json:"iid,omitempty"`
 	Title                              *string    `url:"title,omitempty" json:"title,omitempty"`
 	Description                        *string    `url:"description,omitempty" json:"description,omitempty"`
 	Confidential                       *bool      `url:"confidential,omitempty" json:"confidential,omitempty"`
@@ -296,7 +289,7 @@ func (s *IssuesService) CreateIssue(pid interface{}, opt *CreateIssueOptions, op
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/issues", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -338,7 +331,7 @@ func (s *IssuesService) UpdateIssue(pid interface{}, issue int, opt *UpdateIssue
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d", url.QueryEscape(project), issue)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -362,7 +355,7 @@ func (s *IssuesService) DeleteIssue(pid interface{}, issue int, options ...Optio
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d", url.QueryEscape(project), issue)
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {
@@ -383,7 +376,7 @@ func (s *IssuesService) SubscribeToIssue(pid interface{}, issue int, options ...
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/subscribe", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/subscribe", url.QueryEscape(project), issue)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -410,7 +403,7 @@ func (s *IssuesService) UnsubscribeFromIssue(pid interface{}, issue int, options
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/issues/%d/unsubscribe", pathEscape(project), issue)
+	u := fmt.Sprintf("projects/%s/issues/%d/unsubscribe", url.QueryEscape(project), issue)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -443,43 +436,7 @@ func (s *IssuesService) ListMergeRequestsClosingIssue(pid interface{}, issue int
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("/projects/%s/issues/%d/closed_by", pathEscape(project), issue)
-
-	req, err := s.client.NewRequest("GET", u, opt, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var m []*MergeRequest
-	resp, err := s.client.Do(req, &m)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return m, resp, err
-}
-
-// ListMergeRequestsRelatedToIssueOptions represents the available
-// ListMergeRequestsRelatedToIssue() options.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ce/api/issues.html#list-merge-requests-related-to-issue
-type ListMergeRequestsRelatedToIssueOptions ListOptions
-
-// ListMergeRequestsRelatedToIssue gets all the merge requests that are
-// related to the issue
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ce/api/issues.html#list-merge-requests-related-to-issue
-func (s *IssuesService) ListMergeRequestsRelatedToIssue(pid interface{}, issue int, opt *ListMergeRequestsRelatedToIssueOptions, options ...OptionFunc) ([]*MergeRequest, *Response, error) {
-	project, err := parseID(pid)
-	if err != nil {
-		return nil, nil, err
-	}
-	u := fmt.Sprintf("/projects/%s/issues/%d/related_merge_requests",
-		pathEscape(project),
-		issue,
-	)
+	u := fmt.Sprintf("/projects/%s/issues/%d/closed_by", url.QueryEscape(project), issue)
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {

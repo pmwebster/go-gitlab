@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -44,7 +45,7 @@ func (s *AccessRequestsService) ListProjectAccessRequests(pid interface{}, opt *
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/access_requests", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/access_requests", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -70,7 +71,7 @@ func (s *AccessRequestsService) ListGroupAccessRequests(gid interface{}, opt *Li
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/access_requests", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/access_requests", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -96,7 +97,7 @@ func (s *AccessRequestsService) RequestProjectAccess(pid interface{}, options ..
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/access_requests", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/access_requests", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -122,7 +123,7 @@ func (s *AccessRequestsService) RequestGroupAccess(gid interface{}, options ...O
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/access_requests", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/access_requests", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -156,7 +157,7 @@ func (s *AccessRequestsService) ApproveProjectAccessRequest(pid interface{}, use
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/access_requests/%d/approve", pathEscape(project), user)
+	u := fmt.Sprintf("projects/%s/access_requests/%d/approve", url.QueryEscape(project), user)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -181,7 +182,7 @@ func (s *AccessRequestsService) ApproveGroupAccessRequest(gid interface{}, user 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/access_requests/%d/approve", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/access_requests/%d/approve", url.QueryEscape(group), user)
 
 	req, err := s.client.NewRequest("PUT", u, opt, options)
 	if err != nil {
@@ -206,7 +207,7 @@ func (s *AccessRequestsService) DenyProjectAccessRequest(pid interface{}, user i
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("projects/%s/access_requests/%d", pathEscape(project), user)
+	u := fmt.Sprintf("projects/%s/access_requests/%d", url.QueryEscape(project), user)
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {
@@ -225,7 +226,7 @@ func (s *AccessRequestsService) DenyGroupAccessRequest(gid interface{}, user int
 	if err != nil {
 		return nil, err
 	}
-	u := fmt.Sprintf("groups/%s/access_requests/%d", pathEscape(group), user)
+	u := fmt.Sprintf("groups/%s/access_requests/%d", url.QueryEscape(group), user)
 
 	req, err := s.client.NewRequest("DELETE", u, nil, options)
 	if err != nil {

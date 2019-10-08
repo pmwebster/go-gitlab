@@ -57,7 +57,7 @@ func (s *FeaturesService) ListFeatures(options ...OptionFunc) ([]*Feature, *Resp
 // GitLab API docs:
 // https://docs.gitlab.com/ce/api/features.html#set-or-create-a-feature
 func (s *FeaturesService) SetFeatureFlag(name string, value interface{}, options ...OptionFunc) (*Feature, *Response, error) {
-	u := fmt.Sprintf("features/%s", url.PathEscape(name))
+	u := fmt.Sprintf("features/%s", url.QueryEscape(name))
 
 	opt := struct {
 		Value interface{} `url:"value" json:"value"`

@@ -17,6 +17,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 	"time"
 )
 
@@ -33,7 +34,7 @@ type Deployment struct {
 	ID          int          `json:"id"`
 	IID         int          `json:"iid"`
 	Ref         string       `json:"ref"`
-	SHA         string       `json:"sha"`
+	Sha         string       `json:"sha"`
 	CreatedAt   *time.Time   `json:"created_at"`
 	User        *ProjectUser `json:"user"`
 	Environment *Environment `json:"environment"`
@@ -53,7 +54,7 @@ type Deployment struct {
 		Commit     *Commit    `json:"commit"`
 		Pipeline   struct {
 			ID     int    `json:"id"`
-			SHA    string `json:"sha"`
+			Sha    string `json:"sha"`
 			Ref    string `json:"ref"`
 			Status string `json:"status"`
 		} `json:"pipeline"`
@@ -79,7 +80,7 @@ func (s *DeploymentsService) ListProjectDeployments(pid interface{}, opts *ListP
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deployments", pathEscape(project))
+	u := fmt.Sprintf("projects/%s/deployments", url.QueryEscape(project))
 
 	req, err := s.client.NewRequest("GET", u, opts, options)
 	if err != nil {
@@ -103,7 +104,7 @@ func (s *DeploymentsService) GetProjectDeployment(pid interface{}, deployment in
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/deployments/%d", pathEscape(project), deployment)
+	u := fmt.Sprintf("projects/%s/deployments/%d", url.QueryEscape(project), deployment)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {

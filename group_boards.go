@@ -18,6 +18,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 )
 
 // GroupIssueBoardsService handles communication with the group issue board
@@ -61,7 +62,7 @@ func (s *GroupIssueBoardsService) ListGroupIssueBoards(gid interface{}, opt *Lis
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards", pathEscape(group))
+	u := fmt.Sprintf("groups/%s/boards", url.QueryEscape(group))
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -86,7 +87,7 @@ func (s *GroupIssueBoardsService) GetGroupIssueBoard(gid interface{}, board int,
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d", url.QueryEscape(group), board)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
@@ -118,7 +119,7 @@ func (s *GroupIssueBoardsService) ListGroupIssueBoardLists(gid interface{}, boar
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d/lists", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d/lists", url.QueryEscape(group), board)
 
 	req, err := s.client.NewRequest("GET", u, opt, options)
 	if err != nil {
@@ -144,7 +145,7 @@ func (s *GroupIssueBoardsService) GetGroupIssueBoardList(gid interface{}, board,
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/boards/%d/lists/%d",
-		pathEscape(group),
+		url.QueryEscape(group),
 		board,
 		list,
 	)
@@ -181,7 +182,7 @@ func (s *GroupIssueBoardsService) CreateGroupIssueBoardList(gid interface{}, boa
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("groups/%s/boards/%d/lists", pathEscape(group), board)
+	u := fmt.Sprintf("groups/%s/boards/%d/lists", url.QueryEscape(group), board)
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -217,7 +218,7 @@ func (s *GroupIssueBoardsService) UpdateIssueBoardList(gid interface{}, board, l
 		return nil, nil, err
 	}
 	u := fmt.Sprintf("groups/%s/boards/%d/lists/%d",
-		pathEscape(group),
+		url.QueryEscape(group),
 		board,
 		list,
 	)
@@ -247,7 +248,7 @@ func (s *GroupIssueBoardsService) DeleteGroupIssueBoardList(gid interface{}, boa
 		return nil, err
 	}
 	u := fmt.Sprintf("groups/%s/boards/%d/lists/%d",
-		pathEscape(group),
+		url.QueryEscape(group),
 		board,
 		list,
 	)

@@ -23,65 +23,62 @@ to add new and/or missing endpoints. Currently the following services are suppor
 - [x] Award Emojis
 - [x] Branches
 - [x] Broadcast Messages
+- [x] Project-level Variables
+- [x] Group-level Variables
 - [x] Commits
-- [x] Container Registry
 - [x] Custom Attributes
-- [x] Deploy Keys
 - [x] Deployments
-- [ ] Discussions (threaded comments)
+- [x] Deploy Keys
 - [x] Environments
-- [ ] Epic Issues
 - [ ] Epics
+- [ ] Epic Issues
 - [x] Events
-- [x] Feature Flags
+- [x] Feature flags
 - [ ] Geo Nodes
-- [x] GitLab CI Config Templates
-- [x] Gitignores Templates
-- [x] Group Access Requests
-- [x] Group Issue Boards
-- [x] Group Members
-- [x] Group Milestones
-- [x] Group-Level Variables
+- [x] Gitignores templates
+- [x] GitLab CI Config templates
 - [x] Groups
-- [x] Issue Boards
+- [x] Group Access Requests
+- [x] Group Members
 - [x] Issues
+- [x] Issue Boards
+- [x] Group Issue Boards
 - [x] Jobs
 - [x] Keys
 - [x] Labels
 - [x] License
-- [x] Merge Request Approvals
 - [x] Merge Requests
+- [x] Merge Request Approvals
+- [x] Project Milestones
+- [x] Group Milestones
 - [x] Namespaces
 - [x] Notes (comments)
-- [x] Notification Settings
-- [x] Open Source License Templates
+- [ ] Discussions (threaded comments)
+- [x] Notification settings
+- [x] Open source license templates
 - [x] Pages Domains
-- [x] Pipeline Schedules
-- [x] Pipeline Triggers
 - [x] Pipelines
-- [x] Project Access Requests
-- [x] Project Badges
-- [x] Project Clusters
-- [x] Project Import/export
-- [x] Project Members
-- [x] Project Milestones
-- [x] Project Snippets
-- [x] Project-Level Variables
+- [x] Pipeline Triggers
+- [x] Pipeline Schedules
 - [x] Projects (including setting Webhooks)
+- [x] Project Access Requests
+- [x] Project badges
+- [ ] Project import/export
+- [x] Project Members
+- [x] Project Snippets
 - [x] Protected Branches
-- [x] Protected Tags
 - [x] Repositories
 - [x] Repository Files
 - [x] Runners
 - [x] Search
 - [x] Services
 - [x] Settings
-- [x] Sidekiq Metrics
+- [x] Sidekiq metrics
 - [x] System Hooks
 - [x] Tags
 - [x] Todos
 - [x] Users
-- [x] Validate CI Configuration
+- [x] Validate CI configuration
 - [x] Version
 - [x] Wikis
 

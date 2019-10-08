@@ -1,10 +1,10 @@
 package gitlab
 
 import (
+	"fmt"
 	"net/http"
+	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestListTodos(t *testing.T) {
@@ -13,16 +13,21 @@ func TestListTodos(t *testing.T) {
 
 	mux.HandleFunc("/api/v4/todos", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		mustWriteHTTPResponse(t, w, "testdata/list_todos.json")
+		fmt.Fprint(w, `[{"id":1,"state": "pending"},{"id":2,"state":"pending"}]`)
 	})
 
-	opts := &ListTodosOptions{ListOptions: ListOptions{PerPage: 2}}
+	opts := &ListTodosOptions{}
 	todos, _, err := client.Todos.ListTodos(opts)
 
-	require.NoError(t, err)
+	if err != nil {
+		t.Errorf("Todos.ListTodos returned error: %v", err)
+	}
 
-	want := []*Todo{{ID: 1, State: "pending", Target: TodoTarget{ID: 1, ApprovalsBeforeMerge: 2}}, {ID: 2, State: "pending", Target: TodoTarget{ID: 2}}}
-	require.Equal(t, want, todos)
+	want := []*Todo{{ID: 1, State: "pending"}, {ID: 2, State: "pending"}}
+	if !reflect.DeepEqual(want, todos) {
+		t.Errorf("Todos.ListTodos returned %+v, want %+v", todos, want)
+	}
+
 }
 
 func TestMarkAllTodosAsDone(t *testing.T) {
@@ -35,7 +40,10 @@ func TestMarkAllTodosAsDone(t *testing.T) {
 	})
 
 	_, err := client.Todos.MarkAllTodosAsDone()
-	require.NoError(t, err)
+
+	if err != nil {
+		t.Fatalf("Todos.MarkTodosRead returns an error: %v", err)
+	}
 }
 
 func TestMarkTodoAsDone(t *testing.T) {
@@ -47,5 +55,8 @@ func TestMarkTodoAsDone(t *testing.T) {
 	})
 
 	_, err := client.Todos.MarkTodoAsDone(1)
-	require.NoError(t, err)
+
+	if err != nil {
+		t.Fatalf("Todos.MarkTodoRead returns an error: %v", err)
+	}
 }

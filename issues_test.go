@@ -14,7 +14,7 @@ func TestGetIssue(t *testing.T) {
 
 	mux.HandleFunc("/api/v4/projects/1/issues/5", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		fmt.Fprint(w, `{"id":1, "description": "This is test project", "author" : {"id" : 1, "name": "snehal"}, "assignees":[{"id":1}],"merge_requests_count": 1}`)
+		fmt.Fprint(w, `{"id":1, "description": "This is test project", "author" : {"id" : 1, "name": "snehal"}, "assignees":[{"id":1}]}`)
 	})
 
 	issue, _, err := client.Issues.GetIssue("1", 5)
@@ -23,11 +23,10 @@ func TestGetIssue(t *testing.T) {
 	}
 
 	want := &Issue{
-		ID:                1,
-		Description:       "This is test project",
-		Author:            &IssueAuthor{ID: 1, Name: "snehal"},
-		Assignees:         []*IssueAssignee{{ID: 1}},
-		MergeRequestCount: 1,
+		ID:          1,
+		Description: "This is test project",
+		Author:      &IssueAuthor{ID: 1, Name: "snehal"},
+		Assignees:   []*IssueAssignee{{ID: 1}},
 	}
 
 	if !reflect.DeepEqual(want, issue) {
@@ -273,8 +272,6 @@ func TestListMergeRequestsClosingIssue(t *testing.T) {
 
 	mux.HandleFunc("/api/v4/projects/1/issues/5/closed_by", func(w http.ResponseWriter, r *http.Request) {
 		testMethod(t, r, "GET")
-		testURL(t, r, "/api/v4/projects/1/issues/5/closed_by?page=1&per_page=10")
-
 		fmt.Fprint(w, `[{"id":1, "title" : "test merge one"},{"id":2, "title" : "test merge two"}]`)
 	})
 
@@ -283,33 +280,6 @@ func TestListMergeRequestsClosingIssue(t *testing.T) {
 		PerPage: 10,
 	}
 	mergeRequest, _, err := client.Issues.ListMergeRequestsClosingIssue("1", 5, listMergeRequestsClosingIssueOpt)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	want := []*MergeRequest{{ID: 1, Title: "test merge one"}, {ID: 2, Title: "test merge two"}}
-
-	if !reflect.DeepEqual(want, mergeRequest) {
-		t.Errorf("Issues.ListMergeRequestsClosingIssue returned %+v, want %+v", mergeRequest, want)
-	}
-}
-
-func TestListMergeRequestsRelatedToIssue(t *testing.T) {
-	mux, server, client := setup()
-	defer teardown(server)
-
-	mux.HandleFunc("/api/v4/projects/1/issues/5/related_merge_requests", func(w http.ResponseWriter, r *http.Request) {
-		testMethod(t, r, "GET")
-		testURL(t, r, "/api/v4/projects/1/issues/5/related_merge_requests?page=1&per_page=10")
-
-		fmt.Fprint(w, `[{"id":1, "title" : "test merge one"},{"id":2, "title" : "test merge two"}]`)
-	})
-
-	listMergeRequestsRelatedToIssueOpt := &ListMergeRequestsRelatedToIssueOptions{
-		Page:    1,
-		PerPage: 10,
-	}
-	mergeRequest, _, err := client.Issues.ListMergeRequestsRelatedToIssue("1", 5, listMergeRequestsRelatedToIssueOpt)
 	if err != nil {
 		log.Fatal(err)
 	}

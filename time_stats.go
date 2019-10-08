@@ -2,6 +2,7 @@ package gitlab
 
 import (
 	"fmt"
+	"net/url"
 )
 
 // timeStatsService handles communication with the time tracking related
@@ -42,7 +43,7 @@ func (s *timeStatsService) setTimeEstimate(pid interface{}, entity string, issue
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/%s/%d/time_estimate", pathEscape(project), entity, issue)
+	u := fmt.Sprintf("projects/%s/%s/%d/time_estimate", url.QueryEscape(project), entity, issue)
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -66,7 +67,7 @@ func (s *timeStatsService) resetTimeEstimate(pid interface{}, entity string, iss
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/%s/%d/reset_time_estimate", pathEscape(project), entity, issue)
+	u := fmt.Sprintf("projects/%s/%s/%d/reset_time_estimate", url.QueryEscape(project), entity, issue)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -97,7 +98,7 @@ func (s *timeStatsService) addSpentTime(pid interface{}, entity string, issue in
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/%s/%d/add_spent_time", pathEscape(project), entity, issue)
+	u := fmt.Sprintf("projects/%s/%s/%d/add_spent_time", url.QueryEscape(project), entity, issue)
 
 	req, err := s.client.NewRequest("POST", u, opt, options)
 	if err != nil {
@@ -121,7 +122,7 @@ func (s *timeStatsService) resetSpentTime(pid interface{}, entity string, issue 
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/%s/%d/reset_spent_time", pathEscape(project), entity, issue)
+	u := fmt.Sprintf("projects/%s/%s/%d/reset_spent_time", url.QueryEscape(project), entity, issue)
 
 	req, err := s.client.NewRequest("POST", u, nil, options)
 	if err != nil {
@@ -145,7 +146,7 @@ func (s *timeStatsService) getTimeSpent(pid interface{}, entity string, issue in
 	if err != nil {
 		return nil, nil, err
 	}
-	u := fmt.Sprintf("projects/%s/%s/%d/time_stats", pathEscape(project), entity, issue)
+	u := fmt.Sprintf("projects/%s/%s/%d/time_stats", url.QueryEscape(project), entity, issue)
 
 	req, err := s.client.NewRequest("GET", u, nil, options)
 	if err != nil {
